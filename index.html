@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>CS Guides</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: sans-serif; 
+            background: #1a1a1a; 
+            color: white; 
+            text-align: center; 
+            padding: 20px; 
+            padding-top: 70px;
+            margin: 0;
+        }
+        .section { display: none; margin-top: 20px; }
+
+        button {
+            padding: 15px 30px; margin: 10px; cursor: pointer;
+            background: #444; color: white; border: none; border-radius: 5px;
+            font-size: 18px; transition: 0.3s;
+        }
+        button:hover { background: #666; }
+
+        .btn-ct { background: #4a90e2; }
+        .btn-t { background: #de9b35; }
+        .btn-smoke { background: #5a6c7d; }
+        .btn-flash { background: #e8d5a3; color: #333; }
+
+        /* ===== ВЕРХНЯЯ НАВИГАЦИЯ ===== */
+        #top-nav {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%;
+            background: #111;
+            padding: 12px 20px;
+            z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-bottom: 1px solid #333;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+        .nav-crumb {
+            background: #333;
+            border: none;
+            color: #ccc;
+            font-size: 15px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 4px;
+            transition: 0.2s;
+            margin: 0 2px;
+        }
+        .nav-crumb:hover { background: #4a90e2; color: white; }
+        .nav-sep { color: #555; font-weight: bold; margin: 0 4px; user-select: none; }
+        .nav-current { 
+            color: #fff; 
+            font-weight: bold; 
+            font-size: 15px; 
+            background: #2a2a2a; 
+            padding: 6px 12px; 
+            border-radius: 4px; 
+            margin: 0 2px; 
+            border: 1px solid #444;
+        }
+
+        /* ===== ГАЛЕРЕЯ ===== */
+        /* Большая картинка (первая в каждом блоке) */
+        .gallery .main-img {
+            width: 80%; 
+            max-width: 800px; 
+            display: block;
+            margin: 20px auto; 
+            border: 2px solid #555;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .gallery .main-img:hover {
+            transform: scale(1.02);
+            border-color: #888;
+        }
+
+        /* Ряд маленьких картинок */
+        .thumb-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 10px auto;
+            max-width: 900px;
+        }
+        .thumb-row img {
+            width: 30%;
+            max-width: 290px;
+            min-width: 180px;
+            flex: 1;
+            display: block;
+            border: 2px solid #444;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border-radius: 6px;
+        }
+        .thumb-row img:hover {
+            transform: scale(1.05);
+            border-color: #888;
+        }
+
+        h4 { color: #aaa; margin-top: 40px; border-bottom: 1px solid #444; display: inline-block; padding: 0 20px; }
+        p { color: #999; font-style: italic; }
+
+        /* ===== LIGHTBOX ===== */
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0; top: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.97);
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .lightbox.active { display: flex; }
+        .lightbox img {
+            min-width: 90vw;
+            min-height: 90vh;
+            max-width: 98vw;
+            max-height: 98vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border: none;
+            box-shadow: 0 0 40px rgba(0,0,0,0.9);
+            cursor: default;
+        }
+        .lightbox-close {
+            position: absolute;
+            top: 20px; right: 25px;
+            font-size: 48px;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-weight: bold;
+            transition: 0.2s;
+            z-index: 1001;
+            line-height: 1;
+        }
+        .lightbox-close:hover {
+            color: #ff4d4d;
+            transform: scale(1.15);
+        }
+    </style>
+</head>
+<body>
+
+    <nav id="top-nav">
+        <span id="breadcrumb"></span>
+    </nav>
+
+    <div id="main-menu" class="section" style="display: block;">
+        <h1>Выберите карту</h1>
+        <button onclick="showSideMenu('dust2')">Dust 2</button>
+        <button onclick="showSideMenu('mirage')">Mirage</button>
+        <button onclick="showSideMenu('ancient')">Ancient</button>
+        <button onclick="showSideMenu('cache')">Cache</button>
+    </div>
+
+    <div id="side-menu" class="section">
+        <h1 id="map-title">Карта</h1>
+        <div>
+            <button class="btn-ct" onclick="showGrenadeMenu('ct')">CT</button>
+            <button class="btn-t" onclick="showGrenadeMenu('t')">T</button>
+        </div>
+    </div>
+
+    <div id="grenade-menu" class="section">
+        <h1 id="side-title">Сторона</h1>
+        <div>
+            <button class="btn-smoke" onclick="showGallery('smoke')">Smoke</button>
+            <button class="btn-flash" onclick="showGallery('flash')">Flash</button>
+        </div>
+    </div>
+
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+        <img id="lightbox-img" src="" alt="">
+    </div>
+
+    <!-- ===== DUST 2 ===== -->
+    <div id="dust2-t-smoke" class="section gallery">
+        <h2>Dust 2 — T — Smoke</h2>
+
+        <h4>mid box</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/dust2/mid_door_t4_resized.webp" alt="результат mid_door">
+        <p>целимся на верхушку ствола пальмы, и двигаем вправо до середины верхушки стены</p>
+        <div class="thumb-row">
+            <img src="media/dust2/mid_door_t3_resized.webp" alt="лайнап mid_door">
+            <img src="media/dust2/mid_door_t2_resized.webp" alt="куда встать - mid_door">
+            <img src="media/dust2/mid_door_t1_resized.webp" alt="ориентир mid_door">
+        </div>
+
+
+        <h4>b door</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/dust2/b_door2.webp" alt="результат b_door">
+        <p>целимся на угол дома, опускаем прицел чуть ниже, чтобы прицел был напротив пятнышка</p>
+        <div class="thumb-row">
+            <img src="media/dust2/b_door1.webp" alt="лайнап b_door">
+            <img src="media/dust2/b_raskid.webp" alt="куда встать - b_door">
+        </div>
+        <h4>b выход</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/dust2/b_dalynii2.webp" alt="результат b_dalynii">
+        <p>целимся на выпуклую хуйню</p>
+        <div class="thumb-row">
+            <img src="media/dust2/b_dalynii1.webp" alt="лайнап b_dalynii">
+            <img src="media/dust2/b_raskid.webp" alt="куда встать - b_dalynii">
+        </div>
+
+
+        <h4>short --> car</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/dust2/short_car4_resized.webp" alt="результат short car">
+        <p>целимся так, чтобы перекрестие пересекало верхушку стены и хуйню у антенны</p>
+        <div class="thumb-row">
+            <img src="media/dust2/short_car3_resized.webp" alt="лайнап short car">
+            <img src="media/dust2/short_car2_resized.webp" alt="куда встать - short car">
+            <img src="media/dust2/short_car1_resized.webp" alt="ориентир short car">
+        </div>
+    </div>
+
+    <div id="dust2-t-flash" class="section gallery">
+        <h2>Dust 2 — T — Flash</h2>
+        <h4>long</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/dust2/long_flash_t3_resized.webp" alt="результат long_flash_t">
+        <div class="thumb-row">
+            <img src="media/dust2/long_flash_t2_resized.webp" alt="лайнап long_flash_t">
+            <img src="media/dust2/long_flash_t1_resized.webp" alt="куда встать - long_flash_t">
+        </div>
+        <h4>B flash</h4>
+        <p>jumpthrow</p>
+        <div class="thumb-row">
+            <img src="media/dust2/b_tunnel_flash2_resized.webp" alt="лайнап b_tunnel_flash">
+            <img src="media/dust2/b_tunnel_flash1_resized.webp" alt="куда встать - b_tunnel_flash">
+        </div>
+        <h4>retake long</h4>
+        <p>throw с контрола</p>
+        <div class="thumb-row">
+            <img src="media/dust2/retake_long_flash_t2_resized.webp" alt="лайнап retake_long_flash_t">
+            <img src="media/dust2/retake_long_flash_t1_resized.webp" alt="куда встать - retake_long_flash_t">
+        </div>
+    </div>
+
+    <div id="dust2-ct-smoke" class="section gallery">
+        <h2>Dust 2 — CT — Smoke</h2>
+        <h4>short --> car</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/dust2/short_car4_resized.webp" alt="результат short car">
+        <p>целимся так, чтобы перекрестие пересекало верхушку стены и хуйню у антенны</p>
+        <div class="thumb-row">
+            <img src="media/dust2/short_car3_resized.webp" alt="лайнап short car">
+            <img src="media/dust2/short_car2_resized.webp" alt="куда встать - short car">
+            <img src="media/dust2/short_car1_resized.webp" alt="ориентир short car">
+        </div>
+    </div>
+
+    <div id="dust2-ct-flash" class="section gallery">
+        <h2>Dust 2 — CT — Flash</h2>
+        <h4>long</h4>
+        <p>throw</p>
+        <div class="thumb-row">
+            <img src="media/dust2/long_flash_ct2_resized.webp" alt="лайнап long_flash_ct">
+            <img src="media/dust2/long_flash_ct1_resized.webp" alt="куда встать - long_flash_ct">
+        </div>
+    </div>
+
+    <!-- ===== MIRAGE ===== -->
+    <div id="mirage-t-smoke" class="section gallery">
+        <h2>Mirage — T — Smoke</h2>
+
+        <h4>connector</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/mirage/connector_t3_resized.webp" alt="результат connector_t">
+        <div class="thumb-row">
+            <img src="media/mirage/connector_t2_resized.webp" alt="лайнап connector_t">
+            <img src="media/mirage/connector_t1_resized.webp" alt="куда встать - connector_t">
+        </div>
+
+        <h4>t window</h4>
+        <p>D + jumpthrow</p>
+        <img class="main-img" src="media/mirage/mid_window_t3_resized.webp" alt="результат mid_window_t">
+        <div class="thumb-row">
+            <img src="media/mirage/mid_window_t2_resized.webp" alt="лайнап mid_window_t">
+            <img src="media/mirage/mid_window_t1_resized.webp" alt="куда встать - mid_window_t">
+        </div>
+
+        <h4>stairs</h4>
+        <p>throw</p>
+        <img class="main-img" src="media/mirage/stairs4_resized.webp" alt="результат stairs">
+        <div class="thumb-row">
+            <img src="media/mirage/stairs3_resized.webp" alt="лайнап stairs">
+            <img src="media/mirage/stairs2_resized.webp" alt="куда встать - stairs">
+            <img src="media/mirage/stairs1_resized.webp" alt="ориентир stairs">
+        </div>
+
+        <h4>ct</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/mirage/ct4_resized.webp" alt="результат ct">
+        <div class="thumb-row">
+            <img src="media/mirage/ct3_resized.webp" alt="лайнап ct">
+            <img src="media/mirage/ct2_resized.webp" alt="куда встать - ct">
+            <img src="media/mirage/ct1_resized.webp" alt="ориентир ct">
+        </div>
+
+        <h4>kitchen window</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/mirage/kitchen_window3_resized.webp" alt="результат kitchen_window">
+        <div class="thumb-row">
+            <img src="media/mirage/kitchen_window2_resized.webp" alt="лайнап kitchen_window">
+            <img src="media/mirage/kitchen_window1_resized.webp" alt="куда встать - kitchen_window">
+        </div>
+
+        <h4>kitchen door</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/mirage/kitchen_door2_resized.webp" alt="результат kitchen_door">
+        <div class="thumb-row">
+            <img src="media/mirage/kitchen_door1_resized.webp" alt="лайнап kitchen_door">
+            <img src="media/mirage/kitchen_window1_resized.webp" alt="куда встать - kitchen_door">
+        </div>
+
+        <h4>top mid window</h4>
+        <p>throw</p>
+        <img class="main-img" src="media/mirage/topmid_window3_resized.webp" alt="результат topmid_window">
+        <div class="thumb-row">
+            <img src="media/mirage/topmid_window2_resized.webp" alt="лайнап topmid_window">
+            <img src="media/mirage/topmid_window1_resized.webp" alt="куда встать - topmid_window">
+        </div>
+
+        <h4>top mid short</h4>
+        <p>throw</p>
+        <img class="main-img" src="media/mirage/topmid_short3_resized.webp" alt="результат topmid_short">
+        <div class="thumb-row">
+            <img src="media/mirage/topmid_short2_resized.webp" alt="лайнап topmid_short">
+            <img src="media/mirage/topmid_short1_resized.webp" alt="куда встать - topmid_short">
+        </div>
+    </div>
+
+    <div id="mirage-t-flash" class="section gallery">
+        <h2>Mirage — T — Flash</h2>
+        <p>Тут пока пусто</p>
+    </div>
+
+    <div id="mirage-ct-smoke" class="section gallery">
+        <h2>Mirage — CT — Smoke</h2>
+        <p>Тут пока пусто</p>
+    </div>
+
+    <div id="mirage-ct-flash" class="section gallery">
+        <h2>Mirage — CT — Flash</h2>
+        <p>Тут пока пусто</p>
+    </div>
+
+    <!-- ===== ANCIENT ===== -->
+    <div id="ancient-t-smoke" class="section gallery">
+        <h2>Ancient — T — Smoke</h2>
+
+        <h4>b tample exit</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/ancient/b_tample_exit3_resized.webp" alt="результат b_tample_exit">
+        <div class="thumb-row">
+            <img src="media/ancient/b_tample_exit2_resized.webp" alt="лайнап b_tample_exit">
+            <img src="media/ancient/b_tample_exit1_resized.webp" alt="куда встать - b_tample_exit">
+        </div>
+
+        <h4>red room</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/ancient/redroom_t4_resized.webp" alt="результат redroom_t">
+        <div class="thumb-row">
+            <img src="media/ancient/redroom_t3_resized.webp" alt="лайнап redroom_t">
+            <img src="media/ancient/redroom_t2_resized.webp" alt="куда встать - redroom_t">
+            <img src="media/ancient/redroom_t1_resized.webp" alt="ориентир redroom_t">
+        </div>
+
+        <h4>Б центр плента</h4>
+        <p>throw</p>
+        <img class="main-img" src="media/ancient/b_centr3.webp" alt="результат b_centr">
+        <p>там есть такая ямочка у листьев, в нее целься (или чуть правее)</p>
+        <div class="thumb-row">
+            <img src="media/ancient/b_centr2.webp" alt="лайнап b_centr">
+            <img src="media/ancient/b_raskid_resized.webp" alt="куда встать - b_centr">
+        </div>
+
+        <h4>Б темная</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/ancient/b_temnaya2_resized.webp" alt="результат b_temnaya">
+        <div class="thumb-row">
+            <img src="media/ancient/b_temnaya1_resized.webp" alt="лайнап b_temnaya">
+            <img src="media/ancient/b_raskid_resized.webp" alt="куда встать - b_temnaya">
+        </div>
+
+        <h4>Б светлая</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/ancient/b_svetlaya2_resized.webp" alt="результат b_svetlaya">
+        <div class="thumb-row">
+            <img src="media/ancient/b_svetlaya1_resized.webp" alt="лайнап b_svetlaya">
+            <img src="media/ancient/b_raskid_resized.webp" alt="куда встать - b_svetlaya">
+        </div>
+
+        <h4>B tample</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/ancient/b_tample2_resized.webp" alt="результат b_tample">
+        <div class="thumb-row">
+            <img src="media/ancient/b_tample1_resized.webp" alt="лайнап b_tample">
+            <img src="media/ancient/b_raskid_resized.webp" alt="куда встать - b_tample">
+        </div>
+    </div>
+
+    <div id="ancient-t-flash" class="section gallery">
+        <h2>Ancient — T — Flash</h2>
+        <p>Тут пока пусто</p>
+    </div>
+
+    <div id="ancient-ct-smoke" class="section gallery">
+        <h2>Ancient — CT — Smoke</h2>
+        <p>Тут пока пусто</p>
+    </div>
+
+    <div id="ancient-ct-flash" class="section gallery">
+        <h2>Ancient — CT — Flash</h2>
+        <p>Тут пока пусто</p>
+    </div>
+
+    <!-- ===== CACHE ===== -->
+    <div id="cache-t-smoke" class="section gallery">
+        <h2>Cache — T — Smoke</h2>
+
+        <h4>short</h4>
+        <p>jumpthrow</p>
+        <img class="main-img" src="media/cache/short4_resized.webp" alt="результат шорт">
+        <div class="thumb-row">
+            <img src="media/cache/short3_resized.webp" alt="лайнап шорт">
+            <img src="media/cache/short1_resized.webp" alt="куда встать - шорт">
+            <img src="media/cache/short2_resized.webp" alt="ориентир шорт">
+        </div>
+
+        <h4>mid door</h4>
+        <p>бежишь по полоске, добегаешь до конца полоски -> jumpthrow</p>
+        <img class="main-img" src="media/cache/mid_door4_resized.webp" alt="результат mid door">
+        <div class="thumb-row">
+            <img src="media/cache/mid_door3_resized.webp" alt="лайнап mid door">
+            <img src="media/cache/mid_door1_resized.webp" alt="куда встать - mid door">
+            <img src="media/cache/mid_door2_resized.webp" alt="ориентир mid door">
+        </div>
+
+        <h4>A main</h4>
+        <p>throw - не видно с плента (станет видно за грузчиком)</p>
+        <img class="main-img" src="media/cache/a_main_t3_resized.webp" alt="результат a_main_t">
+        <div class="thumb-row">
+            <img src="media/cache/a_main_t2_resized.webp" alt="лайнап a_main_t">
+            <img src="media/cache/a_main_t1_resized.webp" alt="куда встать - a_main_t">
+        </div>
+
+        <h4>A flash</h4>
+        <p>throw</p>
+        <div class="thumb-row">
+            <img src="media/cache/a_flash3_resized.webp" alt="лайнап mid door">
+            <img src="media/cache/a_flash1_resized.webp" alt="куда встать - a_flash3">
+            <img src="media/cache/a_flash2_resized.webp" alt="ориентир a_flash3">
+        </div>
+    </div>
+
+    <div id="cache-t-flash" class="section gallery">
+        <h2>Cache — T — Flash</h2>
+        <p>Тут пока пусто</p>
+    </div>
+
+    <div id="cache-ct-smoke" class="section gallery">
+        <h2>Cache — CT — Smoke</h2>
+
+        <h4>A main</h4>
+        <p>throw - можно сейвово выйти по правой стенке и чекнуть плент</p>
+        <img class="main-img" src="media/cache/retake_b_ct3_resized.webp" alt="результат retake_b_ct">
+        <div class="thumb-row">
+            <img src="media/cache/retake_b_ct2_resized.webp" alt="лайнап retake_b_ct">
+            <img src="media/cache/retake_b_ct1_resized.webp" alt="куда встать - retake_b_ct">
+        </div>
+    </div>
+
+    <div id="cache-ct-flash" class="section gallery">
+        <h2>Cache — CT — Flash</h2>
+        <p>Тут пока пусто</p>
+    </div>
+
+    <script>
+        let currentMap = '';
+        let currentSide = '';
+        let currentGrenade = '';
+
+        function hideAll() {
+            document.querySelectorAll('.section').forEach(el => el.style.display = 'none');
+        }
+
+        function updateBreadcrumb() {
+            const bc = document.getElementById('breadcrumb');
+            let html = `<button class="nav-crumb" onclick="showMainMenu()">Карты</button>`;
+
+            if (currentMap) {
+                html += ` <span class="nav-sep">/</span> `;
+                html += `<button class="nav-crumb" onclick="showSideMenu('${currentMap}')">${getMapName(currentMap)}</button>`;
+            }
+            if (currentSide) {
+                html += ` <span class="nav-sep">/</span> `;
+                html += `<button class="nav-crumb" onclick="showGrenadeMenu('${currentSide}')">${currentSide.toUpperCase()}</button>`;
+            }
+            if (currentGrenade) {
+                html += ` <span class="nav-sep">/</span> `;
+                html += `<span class="nav-current">${currentGrenade.charAt(0).toUpperCase() + currentGrenade.slice(1)}</span>`;
+            }
+            bc.innerHTML = html;
+        }
+
+        function getMapName(id) {
+            const names = { dust2: 'Dust 2', mirage: 'Mirage', ancient: 'Ancient', cache: 'Cache' };
+            return names[id] || id;
+        }
+
+        function showMainMenu() {
+            hideAll();
+            currentMap = ''; currentSide = ''; currentGrenade = '';
+            document.getElementById('main-menu').style.display = 'block';
+            updateBreadcrumb();
+        }
+
+        function showSideMenu(mapId) {
+            hideAll();
+            currentMap = mapId; currentSide = ''; currentGrenade = '';
+            document.getElementById('map-title').innerText = mapId.toUpperCase();
+            document.getElementById('side-menu').style.display = 'block';
+            updateBreadcrumb();
+        }
+
+        function showGrenadeMenu(side) {
+            hideAll();
+            currentSide = side; currentGrenade = '';
+            const sideName = side === 'ct' ? 'CT' : 'T';
+            document.getElementById('side-title').innerText = `${currentMap.toUpperCase()} — ${sideName}`;
+            document.getElementById('grenade-menu').style.display = 'block';
+            updateBreadcrumb();
+        }
+
+        function showGallery(grenadeType) {
+            hideAll();
+            currentGrenade = grenadeType;
+            const galleryId = `${currentMap}-${currentSide}-${grenadeType}`;
+            const galleryEl = document.getElementById(galleryId);
+            if (galleryEl) {
+                galleryEl.style.display = 'block';
+            } else {
+                alert('Секция ' + galleryId + ' еще не создана в коде!');
+                showGrenadeMenu(currentSide);
+                return;
+            }
+            updateBreadcrumb();
+        }
+
+        /* ===== LIGHTBOX ===== */
+        function openLightbox(src, alt) {
+            document.getElementById('lightbox-img').src = src;
+            document.getElementById('lightbox-img').alt = alt;
+            document.getElementById('lightbox').classList.add('active');
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('active');
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateBreadcrumb();
+            // Клики по всем картинкам (и большим, и маленьким)
+            document.querySelectorAll('.gallery img').forEach(img => {
+                img.addEventListener('click', () => {
+                    openLightbox(img.src, img.alt);
+                });
+            });
+        });
+
+        document.getElementById('lightbox').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('lightbox')) {
+                closeLightbox();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeLightbox();
+        });
+    </script>
+</body>
+</html>
